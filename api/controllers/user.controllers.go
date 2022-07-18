@@ -18,8 +18,14 @@ func (server *Server) GetUsers(w http.ResponseWriter, r *http.Request) {
 		responses.ERROR(w, http.StatusInternalServerError, err)
 		return
 	}
-
-	responses.JSON(w, http.StatusOK, users)
+	// TODO, paramer size, index, total...
+	featchListResp := &responses.FeatchListResponse{
+		Total:     len(*users),
+		Size:      len(*users),
+		PageIndex: 1,
+		Data:      &users,
+	}
+	responses.JSON(w, http.StatusOK, featchListResp)
 }
 
 func (server *Server) GetUser(w http.ResponseWriter, r *http.Request) {

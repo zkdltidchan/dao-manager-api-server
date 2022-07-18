@@ -31,23 +31,31 @@ func (server *Server) Login(w http.ResponseWriter, r *http.Request) {
 		responses.ERROR(w, http.StatusUnprocessableEntity, err)
 		return
 	}
-	token, err := server.SignIn(managerUser.Email, managerUser.Password)
+	token, err := server.SignIn(managerUser.Name, managerUser.Password)
 	if err != nil {
 		formattedError := formaterror.FormatError(err.Error())
 		responses.ERROR(w, http.StatusUnprocessableEntity, formattedError)
 		return
 	}
 
-	responses.JSON(w, http.StatusOK, token)
+	manageResponse := responses.ManagerResponse{}
+	manageResponse.ID = managerUser.ID
+	manageResponse.Name = managerUser.Name
+	manageResponse.Email = managerUser.Email
+	loginResponse := &responses.LoginManagerResponse{
+		AccessToken: token,
+		Manager:     manageResponse,
+	}
+	responses.JSON(w, http.StatusOK, loginResponse)
 }
 
-func (server *Server) SignIn(email, password string) (string, error) {
+func (server *Server) SignIn(name, password string) (string, error) {
 
 	var err error
 
 	managerUser := models.ManagerUser{}
 
-	err = server.DB.Debug().Model(models.ManagerUser{}).Where("email = ?", email).Take(&managerUser).Error
+	err = server.DB.Debug().Model(models.ManagerUser{}).Where("name = ?", name).Take(&managerUser).Error
 	if err != nil {
 		return "", err
 	}

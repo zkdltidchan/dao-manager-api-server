@@ -73,12 +73,15 @@ func (u *ManagerUser) Validate(action string) error {
 		if u.Password == "" {
 			return errors.New("Required Password")
 		}
+		if u.Name == "" {
+			return errors.New("Required Name")
+		}
 		if u.Email == "" {
 			return errors.New("Required Email")
 		}
-		if err := checkmail.ValidateFormat(u.Email); err != nil {
-			return errors.New("Invalid Email")
-		}
+		// if err := checkmail.ValidateFormat(u.Email); err != nil {
+		// 	return errors.New("Invalid Email")
+		// }
 		return nil
 
 	default:
