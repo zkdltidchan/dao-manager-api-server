@@ -22,7 +22,8 @@ func (s *Server) initializeRoutes() {
 
 	//Users routes
 	// middlewares.SetMiddlewareAuthentication => for verify auth token
-	s.Router.HandleFunc("/users", middlewares.SetMiddlewareJSON(middlewares.SetMiddlewareAuthentication(s.GetUsers))).Methods("GET", "OPTIONS")
+	// s.Router.HandleFunc("/users", middlewares.SetMiddlewareJSON(middlewares.SetMiddlewareAuthentication(s.GetUsers))).Methods("GET", "OPTIONS")
+	s.Router.HandleFunc("/users", middlewares.SetMiddlewareJSON(s.GetUsers)).Methods("GET", "OPTIONS")
 	s.Router.HandleFunc("/users/{id}", middlewares.SetMiddlewareJSON(middlewares.SetMiddlewareAuthentication(s.GetUser))).Methods("GET", "OPTIONS")
 
 	// //Posts routes

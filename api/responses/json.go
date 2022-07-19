@@ -13,6 +13,11 @@ type FeatchListResponse struct {
 	Data      interface{} `json:"data"`
 }
 
+type ErrorResponse struct {
+	StatusCode   int    `json:"status_code"`
+	ErrorMessage string `json:"error_message"`
+}
+
 func JSON(w http.ResponseWriter, statusCode int, data interface{}) {
 	w.WriteHeader(statusCode)
 	err := json.NewEncoder(w).Encode(data)
@@ -22,14 +27,11 @@ func JSON(w http.ResponseWriter, statusCode int, data interface{}) {
 }
 
 func ERROR(w http.ResponseWriter, statusCode int, err error) {
+	errorResponse := ErrorResponse{}
+	errorResponse.StatusCode = statusCode
+	errorResponse.ErrorMessage = err.Error()
 	if err != nil {
-		JSON(w, statusCode, struct {
-			// ErrorCode int    `json:"error_code"`
-			Error string `json:"error"`
-		}{
-			// ErrorCode: statusCode,
-			Error: err.Error(),
-		})
+		JSON(w, statusCode, errorResponse)
 		return
 	}
 	JSON(w, http.StatusBadRequest, nil)

@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"fmt"
 	"net/http"
 	"strconv"
 
@@ -25,6 +26,7 @@ func (server *Server) GetUsers(w http.ResponseWriter, r *http.Request) {
 		PageIndex: 1,
 		Data:      &users,
 	}
+	fmt.Printf("%v", featchListResp)
 	responses.JSON(w, http.StatusOK, featchListResp)
 }
 
