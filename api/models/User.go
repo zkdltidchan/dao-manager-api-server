@@ -24,8 +24,24 @@ type User struct {
 }
 
 type Response struct {
-	Total int `json:"total"`
-	Data  []User
+	PageIndex int `json:"page_index"`
+	Size      int `json:"size"`
+	Total     int `json:"total"`
+	Data      []User
+}
+
+type UserParameter struct {
+	PageIndex int `json:"page_index"`
+	Size      int `json:"size"`
+	Count     int `json:"Count"`
+	Users     []User
+}
+
+type UserListResponse struct {
+	PageIndex int `json:"page_index"`
+	Size      int `json:"size"`
+	Total     int `json:"total"`
+	User      User
 }
 
 func (User) TableName() string {
@@ -49,13 +65,23 @@ func (u *User) Prepare() {
 	u.UserUpdataTime = time.Now()
 }
 
-func (u *User) FindAllUsers(db *gorm.DB) (*[]User, error) {
+func (u *User) FindAllUsers(db *gorm.DB, userParameter UserParameter) (*[]User, error) {
 	var err error
+	// var total int = 0
 	members := []User{}
-	err = db.Debug().Model(&User{}).Limit(100).Find(&members).Error
+	// responses := Response{}
+	// responses.Data = []User{}
+
+	err = db.Debug().Model(&User{}).Limit(userParameter.Size).Offset((userParameter.PageIndex - 1) * userParameter.Size).Find(&responses.Data).Error
+
+	// err = db.Debug().Model(&User{}).Count(&responses.Total).Error
+	// fmt.Printf("%v", userParameter.Count)
+	// err = db.Debug().Model(&User{}).Limit(userParameter.Size).Find(&members).Error
+	// err = db.Debug().Model(&User{}).Limit(100).Find(&members).Error
 	if err != nil {
 		return &[]User{}, err
 	}
+
 	return &members, err
 }
 

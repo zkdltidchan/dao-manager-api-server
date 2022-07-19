@@ -2,6 +2,7 @@ package models
 
 import (
 	"errors"
+	"fmt"
 	"html"
 	"log"
 	"strings"
@@ -91,12 +92,12 @@ func (u *ManagerUser) Validate(action string) error {
 		if u.Password == "" {
 			return errors.New("Required Password")
 		}
+		if u.Phone == "" {
+			return errors.New("Required Phone")
+		}
 		if u.Email == "" {
 			return errors.New("Required Email")
 		}
-		// if u.Phone == "" {
-		// 	return errors.New("Required Phone")
-		// }
 		if err := checkmail.ValidateFormat(u.Email); err != nil {
 			return errors.New("Invalid Email")
 		}
