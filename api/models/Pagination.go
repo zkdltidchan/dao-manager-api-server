@@ -54,6 +54,6 @@ func GetCurrentPage(offSet int) int {
 	if offSet < 1 {
 		return 1
 	} else {
-		return offSet
+		return offSet + 1
 	}
 }
