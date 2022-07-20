@@ -7,10 +7,10 @@ import (
 )
 
 type FeatchListResponse struct {
-	Size      int         `json:"size"`
-	PageIndex int         `json:"page_index"`
-	Total     int         `json:"total"`
-	Data      interface{} `json:"data"`
+	Size      int `json:"size"`
+	PageIndex int `json:"page_index"`
+	Total     int `json:"total"`
+	// Data      interface{} `json:"data"`
 }
 
 type ErrorResponse struct {

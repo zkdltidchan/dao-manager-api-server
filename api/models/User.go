@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/jinzhu/gorm"
+	"github.com/zkdltidchan/dao-manager-api-server/api/responses"
 )
 
 // gorm => a database ORM
@@ -23,25 +24,27 @@ type User struct {
 	UserRecentLogin time.Time `gorm:"default:CURRENT_TIMESTAMP" json:"user_recent_login"`
 }
 
-type Response struct {
-	PageIndex int `json:"page_index"`
-	Size      int `json:"size"`
-	Total     int `json:"total"`
-	Data      []User
+// TODO, user data response
+// type UserDat struct {
+// 	UserID          string    `gorm:"size:20;primary_key;notnull" json:"user_id"`
+// 	UserName        string    `gorm:"size:10;not null;unique" json:"user_name"`
+// 	UserNick        string    `gorm:"size:30;not null;unique" json:"user_nick"`
+// 	UserKBank       string    `gorm:"size:20;not null;unique" json:"user_kbank"`
+// 	UserPhone       string    `gorm:"size:15;not null;unique" json:"user_phone"`
+// 	UserEmail       string    `gorm:"size:40;not null;unique" json:"user_email"`
+// 	UserJoinDate    time.Time `gorm:"default:CURRENT_TIMESTAMP" json:"user_join_date"`
+// 	UserUpdataTime  time.Time `gorm:"default:CURRENT_TIMESTAMP" json:"user_update_time"`
+// 	UserRecentLogin time.Time `gorm:"default:CURRENT_TIMESTAMP" json:"user_recent_login"`
+// }
+
+type UserListResponse struct {
+	responses.FeatchListResponse
+	Data []User `json:"data"`
 }
 
 type UserParameter struct {
-	PageIndex int `json:"page_index"`
-	Size      int `json:"size"`
-	Count     int `json:"Count"`
-	Users     []User
-}
-
-type UserListResponse struct {
-	PageIndex int `json:"page_index"`
-	Size      int `json:"size"`
-	Total     int `json:"total"`
-	User      User
+	PageIndex int `schema:"page_index"`
+	Size      int `schema:"size"`
 }
 
 func (User) TableName() string {
@@ -65,24 +68,34 @@ func (u *User) Prepare() {
 	u.UserUpdataTime = time.Now()
 }
 
-func (u *User) FindAllUsers(db *gorm.DB, userParameter UserParameter) (*[]User, error) {
+func (u *User) FindAllUsers(db *gorm.DB, userParameter UserParameter) (*UserListResponse, error) {
+	// func (u *User) FindAllUsers(db *gorm.DB, userParameter UserParameter) (*[]User, error) {
 	var err error
-	// var total int = 0
-	members := []User{}
-	// responses := Response{}
-	// responses.Data = []User{}
-
+	responses := UserListResponse{}
+	// get users
 	err = db.Debug().Model(&User{}).Limit(userParameter.Size).Offset((userParameter.PageIndex - 1) * userParameter.Size).Find(&responses.Data).Error
-
-	// err = db.Debug().Model(&User{}).Count(&responses.Total).Error
-	// fmt.Printf("%v", userParameter.Count)
-	// err = db.Debug().Model(&User{}).Limit(userParameter.Size).Find(&members).Error
-	// err = db.Debug().Model(&User{}).Limit(100).Find(&members).Error
 	if err != nil {
-		return &[]User{}, err
+		return &responses, err
 	}
 
-	return &members, err
+	responses.Size = len(responses.Data)
+	if (userParameter.PageIndex-1)*userParameter.Size > 1 {
+		responses.PageIndex = (userParameter.PageIndex - 1) * userParameter.Size
+	} else {
+		responses.PageIndex = 1
+	}
+
+	err = db.Debug().Model(&User{}).Count(&responses.Total).Error
+	return &responses, err
+
+	// members := []User{}
+	// err = db.Debug().Model(&User{}).Limit(userParameter.Size).Find(&members).Error
+	// err = db.Debug().Model(&User{}).Limit(100).Find(&members).Error
+	// if err != nil {
+	// 	return &[]User{}, err
+	// }
+	// responses.Data = members
+	// return &members, err
 }
 
 func (u *User) FindUserByID(db *gorm.DB, uid uint32) (*User, error) {
