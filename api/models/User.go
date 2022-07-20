@@ -72,20 +72,22 @@ func (u *User) FindAllUsers(db *gorm.DB, userParameter UserParameter) (*UserList
 	// func (u *User) FindAllUsers(db *gorm.DB, userParameter UserParameter) (*[]User, error) {
 	var err error
 	responses := UserListResponse{}
-	// get users
-	err = db.Debug().Model(&User{}).Limit(userParameter.Size).Offset((userParameter.PageIndex - 1) * userParameter.Size).Find(&responses.Data).Error
+	// get all users count with filter,TODO : filter
+	err = db.Debug().Model(&User{}).Count(&responses.Total).Error
 	if err != nil {
 		return &responses, err
 	}
+	responses.PageCounts = GetPages(responses.Total, userParameter.Size)
+	limit := GetLimit(userParameter.Size)
+	offSet := GetOffSet(userParameter.PageIndex, limit, responses.PageCounts)
 
-	responses.Size = len(responses.Data)
-	if (userParameter.PageIndex-1)*userParameter.Size > 1 {
-		responses.PageIndex = (userParameter.PageIndex - 1) * userParameter.Size
-	} else {
-		responses.PageIndex = 1
+	// get users
+	err = db.Debug().Model(&User{}).Limit(limit).Offset(offSet).Find(&responses.Data).Error
+	if err != nil {
+		return &responses, err
 	}
-
-	err = db.Debug().Model(&User{}).Count(&responses.Total).Error
+	responses.Size = len(responses.Data)
+	responses.PageIndex = GetCurrentPage(offSet)
 	return &responses, err
 
 	// members := []User{}
